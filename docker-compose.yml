@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  grokviz:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: grokviz
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      # Persist logs, temp files, and archives
+      - ./data/logs:/app/data/logs
+      - ./data/temp:/app/data/temp
+      - ./data/archive:/app/data/archive
+    networks:
+      - grokviz-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "/app/scripts/health_check.sh"]
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+networks:
+  grokviz-network:
+    driver: bridge

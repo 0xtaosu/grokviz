@@ -50,21 +50,73 @@ The system follows a pipeline architecture with these key modules:
 
 ## Development Commands
 
-When the codebase is implemented, commands will likely include:
+### Setup & Installation
 
 ```bash
-# Setup
+# Clone repository
+git clone <repository-url>
+cd grokviz
+
+# Install dependencies
 pip install -r requirements.txt
 
-# Run locally
-python main.py
+# Configure environment
+cp .env.example .env
+# Edit .env with your credentials
+```
+
+### Local Development
+
+```bash
+# Run workflow once
+python -m src.main
 
 # Run tests
-pytest
+pytest tests/ -v
 
-# Docker
-docker build -t grokviz .
-docker run -d --env-file .env grokviz
+# Run tests with coverage
+pytest tests/ --cov=src --cov-report=html
+
+# Generate and send mock email for testing
+python scripts/generate_mock_email.py
+
+# End-to-end test
+bash scripts/test_workflow.sh
+```
+
+### Docker Deployment
+
+```bash
+# Build and start container
+docker-compose up -d
+
+# View logs
+docker-compose logs -f grokviz
+tail -f data/logs/grokviz.log
+
+# Check container health
+docker exec grokviz /app/scripts/health_check.sh
+
+# Stop container
+docker-compose down
+
+# Rebuild from scratch
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+### Debugging
+
+```bash
+# Check cron status
+docker exec grokviz crontab -l
+docker exec grokviz tail /var/log/cron.log
+
+# Manual run inside container
+docker exec grokviz python -m src.main
+
+# Interactive shell
+docker exec -it grokviz bash
 ```
 
 ## Critical Requirements
@@ -104,11 +156,53 @@ The infographic generation prompt should include:
 
 ## Code Organization
 
-Follow modular design principles:
-- Separate configuration from code
-- Clear module boundaries for each pipeline stage
-- Comprehensive documentation and comments
-- Unit tests for data parsing and transformation logic
+### Project Structure
+
+```
+grokviz/
+├── src/                          # Application source
+│   ├── main.py                   # Main workflow (orchestrates all modules)
+│   ├── config.py                 # Configuration management (env vars)
+│   ├── email_monitor/            # Email module
+│   │   ├── client.py            # IMAP client with retry logic
+│   │   └── parser.py            # Email parsing & attachment extraction
+│   ├── data_processor/           # Data processing module
+│   │   ├── json_processor.py    # JSON validation & normalization
+│   │   └── html_parser.py       # HTML fallback parser
+│   ├── infographic/              # Infographic generation module
+│   │   ├── generator.py         # Gemini API integration
+│   │   └── prompts.py           # Prompt templates
+│   ├── telegram/                 # Telegram module
+│   │   └── bot.py               # Telegram bot integration
+│   └── utils/                    # Shared utilities
+│       ├── logger.py            # Centralized logging
+│       └── errors.py            # Custom exceptions
+├── tests/                        # Test suite
+│   ├── conftest.py              # Pytest fixtures
+│   ├── mock_email_generator.py  # Mock email generator
+│   └── test_*.py                # Unit tests
+├── scripts/                      # Helper scripts
+│   ├── generate_mock_email.py   # Send test email
+│   ├── test_workflow.sh         # E2E test
+│   └── health_check.sh          # Health check
+├── data/                         # Runtime data (gitignored)
+│   ├── logs/                    # Application logs
+│   ├── temp/                    # Generated infographics
+│   └── archive/                 # Archived emails
+├── cron/                         # Cron configuration
+│   └── grokviz-cron             # Runs every 30 minutes
+├── Dockerfile                    # Container build
+├── docker-compose.yml            # Multi-container orchestration
+└── requirements.txt              # Python dependencies
+```
+
+### Key Design Principles
+
+- **Modular architecture**: Each module is independent and testable
+- **Configuration via environment**: No hardcoded credentials
+- **Error handling**: Retry logic with exponential backoff
+- **Logging**: Comprehensive logging with rotation (10MB, 5 backups)
+- **Fallback mechanisms**: JSON → HTML → Skip with logging
 
 ## Future Roadmap Context
 

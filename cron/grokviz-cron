@@ -1,0 +1,7 @@
+# GrokViz cron job - runs every 30 minutes
+# Format: minute hour day month weekday command
+
+# Run GrokViz workflow every 30 minutes
+*/30 * * * * cd /app && /usr/local/bin/python -m src.main >> /var/log/cron.log 2>&1
+
+# Empty line required at end of cron file
