@@ -22,8 +22,8 @@ class TestPrompts:
         assert "information designer" in INFOGRAPHIC_PROMPT.lower()
         assert "consensus opportunities" in INFOGRAPHIC_PROMPT.lower()
         assert "non-consensus opportunities" in INFOGRAPHIC_PROMPT.lower()
-        assert "warm colors" in INFOGRAPHIC_PROMPT.lower()
-        assert "cool colors" in INFOGRAPHIC_PROMPT.lower()
+        assert ("warm" in INFOGRAPHIC_PROMPT.lower() or "macaron" in INFOGRAPHIC_PROMPT.lower())
+        assert ("cool" in INFOGRAPHIC_PROMPT.lower() or "macaron" in INFOGRAPHIC_PROMPT.lower())
 
 
 # Note: Full integration test for InfographicGenerator requires Gemini API key

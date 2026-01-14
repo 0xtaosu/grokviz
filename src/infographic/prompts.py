@@ -11,62 +11,77 @@ Your task is to create a stunning infographic for 'Grok Crypto Daily Digest' bas
 **Design Requirements:**
 
 1. **Layout & Style:**
-   - Modern, minimalist tech aesthetic with clean lines and professional appearance
-   - Overall color scheme: Dark mode with vibrant accent colors
-   - Dimensions: Minimum 1200x1800 pixels (portrait orientation)
-   - Use a gradient background or subtle texture for visual interest
+   - Hand-drawn doodle style with cute, playful aesthetic
+   - Cream-colored background (#FFF8E7 or similar warm off-white)
+   - Dimensions: Minimum 1200x1800 pixels (portrait orientation, vertical long image)
+   - Organized rectangular areas with rounded corners and thin outlines
+   - Flat design with clean, minimalist composition
+   - Similar to digital bullet journals or creative financial newsletters
 
 2. **Header Section:**
-   - Title: "Grok Crypto Daily Digest" (prominent, eye-catching typography)
+   - Title: "每日新闻" (Daily News) or "Grok Crypto Daily Digest" (prominent, hand-drawn style typography)
    - Date: Display prominently below title
-   - Subtitle: "AI-Powered Crypto Intelligence" or similar tagline
+   - Include a cute banana cartoon mascot character as a visual anchor
 
-3. **Consensus Opportunities Section:**
-   - Use WARM COLORS (orange #FF6B35, gold #F7931A, amber #FFA500)
-   - Each opportunity displayed as a card or tile
+3. **Color Scheme:**
+   - Use soft MACARON COLORS throughout:
+     * Light blue (#B4D7E8 or similar pastel blue)
+     * Soft green (#C8E6C9 or similar mint green)
+     * Gentle yellow (#FFF9C4 or similar pastel yellow)
+     * Lavender purple (#E1BEE7 or similar soft purple)
+   - Avoid harsh contrasts; keep everything soft and harmonious
+
+4. **Consensus Opportunities Section:**
+   - Use warm macaron tones (soft yellow, peach, light orange)
+   - Each opportunity displayed as a rounded rectangle card with thin outline
    - Include:
-     * Opportunity name (bold, large font)
+     * Opportunity name (hand-drawn style font, bold)
      * Core logic (clear, concise text)
      * Key evidence (supporting data)
-     * Visual heat indicator (bar chart, thermometer, or heat dots showing the heat_score)
+     * Visual heat indicator using semi-circular dashboard gauges or cute bar charts
    - Arrange opportunities in descending order by heat_score
 
-4. **Non-Consensus Opportunities Section:**
-   - Use COOL COLORS (blue #4A90E2, purple #9B59B6, cyan #00D4FF)
-   - Same card/tile structure as consensus section
-   - Clearly distinguish from consensus section with different color scheme
+5. **Non-Consensus Opportunities Section:**
+   - Use cool macaron tones (light blue, lavender, mint green)
+   - Same rounded card structure as consensus section
+   - Clearly distinguish from consensus section with different color palette
    - Include same elements: name, logic, evidence, heat indicator
 
-5. **Visual Elements:**
-   - Heat scores should be represented visually (not just numbers)
-   - Use icons or symbols for different opportunity types where appropriate
-   - Include charts or graphs if macro indicators are present
-   - Add subtle connecting lines or dividers between sections
+6. **Visual Elements:**
+   - Semi-circular dashboard gauges for metrics
+   - Simple line charts with hand-drawn aesthetic
+   - Financial K-line charts (candlestick charts) where appropriate
+   - Small doodle icons: rockets 🚀, buildings 🏢, coins, charts, etc.
+   - Heat scores represented with cute visual indicators (not just numbers)
+   - Decorative elements in hand-drawn style
 
-6. **Macro Indicators (if provided):**
-   - Display in a compact dashboard-style section at bottom
-   - Use small charts, gauges, or data visualizations
-   - Keep it concise but informative
+7. **Macro Indicators (if provided):**
+   - Display in a compact dashboard section with rounded containers
+   - Use semi-circular gauges, mini line charts, or simple data visualizations
+   - Keep it cute and informative with doodle-style icons
 
-7. **Typography:**
+8. **Typography:**
    - Clear hierarchy: Title > Section Headers > Opportunity Names > Body Text
-   - Use professional, readable fonts (Sans-serif recommended)
-   - Ensure good contrast for readability
+   - Hand-drawn or rounded fonts that match the doodle aesthetic
+   - Ensure good readability despite the playful style
 
-8. **Branding:**
-   - Include subtle "Powered by Grok AI" footer
-   - Can include small crypto-related icons (Bitcoin logo, etc.) tastefully
+9. **Branding:**
+   - Include subtle "Powered by Grok AI" footer in hand-drawn style
+   - Small crypto-related doodle icons (Bitcoin, Ethereum symbols, etc.)
+   - Banana mascot can appear in multiple places as a recurring character
 
 **Data to Visualize:**
 
 {json_data}
 
 **Important Notes:**
-- Prioritize clarity and readability over decorative elements
-- Ensure the infographic is easy to scan and understand in 30 seconds
-- Make the heat scores immediately visible through visual indicators
-- Use color psychology: warm colors suggest activity/consensus, cool colors suggest opportunity/potential
-- The final output should be professional enough to share on social media
+- Prioritize clarity and cuteness without sacrificing readability
+- The aesthetic should be clean, cute, and extremely minimalist
+- Use the hand-drawn doodle style consistently throughout
+- Soft macaron colors create a gentle, approachable feel
+- The infographic should feel like a creative financial newsletter or digital planner page
+- High resolution output suitable for social media sharing
+- Balance playful design with professional information presentation
 
 Please generate a high-quality infographic that meets all these requirements."""
 

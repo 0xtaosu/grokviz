@@ -5,8 +5,8 @@ python-dotenv==1.0.0
 beautifulsoup4==4.12.2
 lxml==5.1.0
 
-# Gemini API
-google-generativeai==0.3.2
+# Gemini API (updated for image generation support)
+google-generativeai>=0.8.6
 
 # Telegram
 python-telegram-bot==20.7

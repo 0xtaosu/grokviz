@@ -50,6 +50,18 @@ class MockEmailGenerator:
                     "logic": "Growing stablecoin supply indicates capital inflow to crypto",
                     "evidence": "Total stablecoin market cap reached $140B, up 8% MoM",
                     "heat_score": 72
+                },
+                {
+                    "name": "AI Agent Tokens Surge",
+                    "logic": "AI narrative gaining momentum with multiple agent protocols launching",
+                    "evidence": "Fetch.ai and SingularityNET tokens up 25% this week, new partnerships announced",
+                    "heat_score": 68
+                },
+                {
+                    "name": "Bitcoin Ordinals NFT Activity",
+                    "logic": "Bitcoin NFT ecosystem showing sustained growth",
+                    "evidence": "Ordinals inscriptions hit 50M milestone, daily volume averaging $5M",
+                    "heat_score": 65
                 }
             ],
             "non_consensus_opportunities": [
@@ -70,6 +82,18 @@ class MockEmailGenerator:
                     "logic": "Retail adoption in developing countries accelerating",
                     "evidence": "Nigeria and India seeing 300% YoY growth in P2P trading volume",
                     "heat_score": 70
+                },
+                {
+                    "name": "Decentralized Social Networks",
+                    "logic": "Web3 social platforms gaining users without mainstream attention",
+                    "evidence": "Lens Protocol daily active users up 150% QoQ, minimal media coverage",
+                    "heat_score": 64
+                },
+                {
+                    "name": "On-Chain Credit Protocols",
+                    "logic": "Undercollateralized lending emerging as next DeFi frontier",
+                    "evidence": "Maple Finance and Goldfinch seeing institutional adoption, $200M loans issued",
+                    "heat_score": 58
                 }
             ],
             "macro_indicators": {
