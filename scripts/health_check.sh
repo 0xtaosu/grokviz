@@ -3,8 +3,8 @@
 
 set -e
 
-# Check if cron process is running
-if ! pgrep -x "cron" > /dev/null; then
+# Check if cron process is running (without pgrep dependency)
+if ! cat /proc/*/comm 2>/dev/null | grep -q "^cron$"; then
     echo "ERROR: Cron process is not running"
     exit 1
 fi

@@ -6,10 +6,11 @@ beautifulsoup4==4.12.2
 lxml==5.1.0
 
 # Gemini API (updated for image generation support)
-google-generativeai>=0.8.6
+google-genai>=0.2.0
 
-# Telegram
+# Telegram (pin httpx to avoid conflicts)
 python-telegram-bot==20.7
+httpx~=0.25.2
 
 # Utilities
 requests==2.31.0
