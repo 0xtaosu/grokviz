@@ -1,5 +1,6 @@
 """Telegram bot for sending infographics to channels/chats."""
 
+import asyncio
 import time
 from pathlib import Path
 from typing import Dict, Any, Optional
@@ -94,12 +95,12 @@ class TelegramBot:
                 logger.info(f"Sending photo to Telegram (attempt {attempt + 1}/{self.max_retries})")
 
                 with open(image_path, "rb") as photo_file:
-                    message = self.bot.send_photo(
+                    message = asyncio.run(self.bot.send_photo(
                         chat_id=self.chat_id,
                         photo=photo_file,
                         caption=caption,
                         parse_mode="Markdown"
-                    )
+                    ))
 
                 message_id = str(message.message_id)
                 logger.info(
@@ -143,12 +144,12 @@ class TelegramBot:
                 logger.info(f"Sending document to Telegram (attempt {attempt + 1}/{self.max_retries})")
 
                 with open(image_path, "rb") as doc_file:
-                    message = self.bot.send_document(
+                    message = asyncio.run(self.bot.send_document(
                         chat_id=self.chat_id,
                         document=doc_file,
                         caption=caption,
                         parse_mode="Markdown"
-                    )
+                    ))
 
                 message_id = str(message.message_id)
                 logger.info(f"Document sent successfully: message_id={message_id}")

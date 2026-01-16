@@ -51,6 +51,21 @@ class JSONProcessor:
                 context={"error": str(e)}
             )
 
+    def process(self, json_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Process JSON data from Grok API.
+
+        Args:
+            json_data: Raw JSON data from Grok API
+
+        Returns:
+            Normalized and validated data structure
+
+        Raises:
+            DataProcessingError: If validation or processing fails
+        """
+        return self.process_attachment(json_data)
+
     def validate_structure(self, json_data: Dict[str, Any]) -> None:
         """
         Validate that JSON data has required fields.

@@ -14,12 +14,10 @@ class Config:
 
     def __init__(self):
         """Initialize configuration from environment variables."""
-        # Email configuration
-        self.email_server = self._get_required("EMAIL_SERVER")
-        self.email_port = self._get_int("EMAIL_PORT", default=993)
-        self.email_username = self._get_required("EMAIL_USERNAME")
-        self.email_password = self._get_required("EMAIL_PASSWORD")
-        self.grok_sender_email = self._get_required("GROK_SENDER_EMAIL")
+        # Grok API configuration
+        self.grok_api_key = self._get_required("GROK_API_KEY")
+        self.grok_model = os.getenv("GROK_MODEL", "grok-4")
+        self.grok_timeout = self._get_int("GROK_TIMEOUT", default=120)
 
         # Gemini API configuration
         self.gemini_api_key = self._get_required("GEMINI_API_KEY")
@@ -33,7 +31,7 @@ class Config:
         self.log_level = os.getenv("LOG_LEVEL", "INFO").upper()
         self.data_dir = Path(os.getenv("DATA_DIR", "/app/data"))
         self.temp_dir = Path(os.getenv("TEMP_DIR", "/app/data/temp"))
-        self.archive_emails = self._get_bool("ARCHIVE_EMAILS", default=True)
+        self.archive_reports = self._get_bool("ARCHIVE_REPORTS", default=True)
         self.processing_timeout = self._get_int("PROCESSING_TIMEOUT", default=180)
 
         # Retry configuration
@@ -86,18 +84,17 @@ class Config:
                 context={"log_level": self.log_level}
             )
 
-        # Validate email port
-        if not (1 <= self.email_port <= 65535):
-            raise ConfigurationError(
-                f"Invalid EMAIL_PORT '{self.email_port}'. Must be between 1 and 65535",
-                context={"email_port": self.email_port}
-            )
-
         # Validate timeouts and retries
         if self.processing_timeout <= 0:
             raise ConfigurationError(
                 f"PROCESSING_TIMEOUT must be positive, got {self.processing_timeout}",
                 context={"processing_timeout": self.processing_timeout}
+            )
+
+        if self.grok_timeout <= 0:
+            raise ConfigurationError(
+                f"GROK_TIMEOUT must be positive, got {self.grok_timeout}",
+                context={"grok_timeout": self.grok_timeout}
             )
 
         if self.max_retries < 0:
@@ -133,8 +130,7 @@ class Config:
     def __repr__(self) -> str:
         """String representation (without sensitive data)."""
         return (
-            f"Config(email_server={self.email_server}, "
-            f"email_port={self.email_port}, "
+            f"Config(grok_model={self.grok_model}, "
             f"gemini_model={self.gemini_model}, "
             f"log_level={self.log_level})"
         )

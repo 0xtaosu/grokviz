@@ -1,10 +1,6 @@
 # Core dependencies
 python-dotenv==1.0.0
 
-# HTML parsing (fallback)
-beautifulsoup4==4.12.2
-lxml==5.1.0
-
 # Gemini API (updated for image generation support)
 google-genai>=0.2.0
 

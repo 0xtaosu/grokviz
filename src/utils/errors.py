@@ -31,6 +31,13 @@ class EmailParseError(GrokVizError):
         super().__init__(message, error_code="EMAIL_PARSE_ERROR", context=context)
 
 
+class GrokAPIError(GrokVizError):
+    """Raised when Grok API call fails."""
+
+    def __init__(self, message: str, context: dict = None):
+        super().__init__(message, error_code="GROK_API_ERROR", context=context)
+
+
 class DataProcessingError(GrokVizError):
     """Raised when data extraction or processing fails."""
 

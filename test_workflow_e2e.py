@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""End-to-end test of the complete workflow (without email)."""
+"""End-to-end test of the complete workflow (without Grok API)."""
 
 import sys
 from pathlib import Path
@@ -18,7 +18,7 @@ def main():
     """Run end-to-end test."""
     print("=" * 70)
     print("GrokViz End-to-End Workflow Test")
-    print("(Email → Data Processing → Infographic → Telegram)")
+    print("(Mock Data → Data Processing → Infographic → Telegram)")
     print("=" * 70)
 
     # Load configuration
@@ -53,7 +53,7 @@ def main():
         print("-" * 70)
 
         json_processor = JSONProcessor()
-        processed_data = json_processor.process_attachment(raw_data)
+        processed_data = json_processor.process(raw_data)
 
         print(f"✓ Data validated and normalized")
 

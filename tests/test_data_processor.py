@@ -1,7 +1,7 @@
 """Tests for data processing module."""
 
 import pytest
-from src.data_processor import JSONProcessor, HTMLParser
+from src.data_processor import JSONProcessor
 from src.utils.errors import DataProcessingError
 
 
@@ -54,41 +54,3 @@ class TestJSONProcessor:
         assert "non_consensus_count" in summary
         assert "consensus_top" in summary
         assert "non_consensus_top" in summary
-
-
-class TestHTMLParser:
-    """Tests for HTMLParser class."""
-
-    def test_parse_html(self, mock_email_generator):
-        """Test HTML parsing."""
-        parser = HTMLParser()
-        generator = mock_email_generator
-
-        json_data = generator.generate_json_attachment()
-        html = generator.generate_html_body(json_data)
-
-        result = parser.parse_html(html)
-
-        # Verify basic structure
-        assert "date" in result
-        assert "consensus_opportunities" in result
-        assert "non_consensus_opportunities" in result
-
-    def test_extract_date(self, mock_email_generator):
-        """Test date extraction from HTML."""
-        parser = HTMLParser()
-        from bs4 import BeautifulSoup
-
-        html = "<html><body>2026-01-13</body></html>"
-        soup = BeautifulSoup(html, "lxml")
-
-        date = parser._extract_date(soup)
-
-        assert "2026-01-13" in date
-
-    def test_parse_empty_html(self):
-        """Test parsing empty HTML."""
-        parser = HTMLParser()
-
-        with pytest.raises(DataProcessingError):
-            parser.parse_html("")

@@ -3,18 +3,17 @@
 import sys
 import time
 from pathlib import Path
-from typing import Optional
 
 from src.config import Config
-from src.email_monitor import EmailClient, EmailParser
-from src.data_processor import JSONProcessor, HTMLParser
+from src.grok_client import GrokClient
+from src.grok_client.prompts import CRYPTO_ANALYSIS_PROMPT
+from src.data_processor import JSONProcessor
 from src.infographic import InfographicGenerator
 from src.telegram import TelegramBot
 from src.utils.logger import setup_logger, get_logger
 from src.utils.errors import (
     GrokVizError,
-    EmailFetchError,
-    EmailParseError,
+    GrokAPIError,
     DataProcessingError,
     InfographicGenerationError,
     TelegramSendError
@@ -32,121 +31,15 @@ def setup_logging(config: Config) -> None:
     )
 
 
-def process_email(
-    email_id: str,
-    raw_email: bytes,
-    email_parser: EmailParser,
-    json_processor: JSONProcessor,
-    html_parser: HTMLParser,
-    infographic_gen: InfographicGenerator,
-    telegram_bot: TelegramBot,
-    email_client: EmailClient,
-    config: Config
-) -> bool:
-    """
-    Process a single email through the complete workflow.
-
-    Args:
-        email_id: Email ID
-        raw_email: Raw email data
-        email_parser: Email parser instance
-        json_processor: JSON processor instance
-        html_parser: HTML parser instance
-        infographic_gen: Infographic generator instance
-        telegram_bot: Telegram bot instance
-        email_client: Email client instance
-        config: Configuration
-
-    Returns:
-        True if processing succeeded, False otherwise
-    """
-    logger = get_logger(__name__)
-
-    try:
-        # Step 1: Parse email
-        logger.info(f"Processing email ID: {email_id}")
-        email_data = email_parser.parse_email(raw_email)
-        logger.info(f"Email parsed: {email_data['subject']}")
-
-        # Validate sender
-        if not email_parser.validate_grok_email(email_data, config.grok_sender_email):
-            logger.warning(f"Email from unexpected sender, skipping: {email_data['from']}")
-            return False
-
-        # Step 2: Extract data (JSON preferred, HTML fallback)
-        structured_data = None
-
-        # Try JSON attachment first
-        json_attachment = email_parser.extract_json_attachment(email_data)
-        if json_attachment:
-            logger.info("Processing data from JSON attachment")
-            structured_data = json_processor.process_attachment(json_attachment)
-        else:
-            # Fallback to HTML parsing
-            logger.warning("No JSON attachment found, falling back to HTML parsing")
-            if email_data.get("html_body"):
-                structured_data = html_parser.parse_html(email_data["html_body"])
-            else:
-                raise DataProcessingError(
-                    "No JSON attachment or HTML body found in email",
-                    context={"email_id": email_id}
-                )
-
-        logger.info(f"Data processed: {structured_data.get('date')}")
-
-        # Step 3: Generate infographic
-        logger.info("Generating infographic...")
-        image_path = infographic_gen.generate(structured_data, timeout=120)
-        logger.info(f"Infographic generated: {image_path}")
-
-        # Step 4: Send to Telegram
-        logger.info("Sending to Telegram...")
-        caption = telegram_bot.format_caption(structured_data)
-        message_id = telegram_bot.send_photo(image_path, caption)
-        logger.info(f"Sent to Telegram: message_id={message_id}")
-
-        # Step 5: Mark email as read
-        email_client.mark_as_read(email_id)
-        logger.info(f"Email {email_id} marked as read")
-
-        # Step 6: Archive (optional)
-        if config.archive_emails:
-            archive_data(email_id, email_data, structured_data, image_path, config)
-
-        logger.info(f"Successfully processed email {email_id}")
-        return True
-
-    except EmailParseError as e:
-        logger.error(f"Email parsing failed for {email_id}: {e}", exc_info=True)
-        return False
-    except DataProcessingError as e:
-        logger.error(f"Data processing failed for {email_id}: {e}", exc_info=True)
-        return False
-    except InfographicGenerationError as e:
-        logger.error(f"Infographic generation failed for {email_id}: {e}", exc_info=True)
-        return False
-    except TelegramSendError as e:
-        logger.error(f"Telegram send failed for {email_id}: {e}", exc_info=True)
-        # Don't mark as read if Telegram send fails
-        return False
-    except Exception as e:
-        logger.error(f"Unexpected error processing email {email_id}: {e}", exc_info=True)
-        return False
-
-
 def archive_data(
-    email_id: str,
-    email_data: dict,
     structured_data: dict,
     image_path: Path,
     config: Config
 ) -> None:
     """
-    Archive processed email data.
+    Archive processed data.
 
     Args:
-        email_id: Email ID
-        email_data: Parsed email data
         structured_data: Processed data
         image_path: Path to generated image
         config: Configuration
@@ -167,7 +60,8 @@ def archive_data(
         date_archive.mkdir(parents=True, exist_ok=True)
 
         # Save structured data as JSON
-        json_path = date_archive / f"{email_id}_data.json"
+        timestamp = datetime.now().strftime("%H%M%S")
+        json_path = date_archive / f"{date_str}_{timestamp}_data.json"
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(structured_data, f, indent=2, ensure_ascii=False)
 
@@ -176,10 +70,10 @@ def archive_data(
             archive_image = date_archive / image_path.name
             shutil.copy2(image_path, archive_image)
 
-        logger.debug(f"Archived data for email {email_id} to {date_archive}")
+        logger.debug(f"Archived data to {date_archive}")
 
     except Exception as e:
-        logger.warning(f"Failed to archive data for {email_id}: {e}")
+        logger.warning(f"Failed to archive data: {e}")
 
 
 def main() -> int:
@@ -187,7 +81,7 @@ def main() -> int:
     Main workflow orchestration.
 
     Returns:
-        Exit code: 0 (success), 1 (partial failure), 2 (complete failure)
+        Exit code: 0 (success), 2 (failure)
     """
     start_time = time.time()
     logger = None
@@ -205,18 +99,14 @@ def main() -> int:
         logger.info("=" * 60)
 
         # Step 3: Initialize components
-        email_client = EmailClient(
-            server=config.email_server,
-            port=config.email_port,
-            username=config.email_username,
-            password=config.email_password,
+        grok_client = GrokClient(
+            api_key=config.grok_api_key,
+            model=config.grok_model,
             max_retries=config.max_retries,
             retry_delay=config.retry_delay
         )
 
-        email_parser = EmailParser()
         json_processor = JSONProcessor()
-        html_parser = HTMLParser()
 
         infographic_gen = InfographicGenerator(
             api_key=config.gemini_api_key,
@@ -233,66 +123,68 @@ def main() -> int:
             retry_delay=config.retry_delay
         )
 
-        # Step 4: Connect to email server
-        email_client.connect()
-
-        # Step 5: Fetch unread emails from Grok
-        emails = email_client.fetch_unread_emails(
-            sender_filter=config.grok_sender_email
+        # Step 4: Call Grok API to generate report
+        logger.info("Calling Grok API to generate crypto analysis report...")
+        raw_data = grok_client.generate_report(
+            CRYPTO_ANALYSIS_PROMPT,
+            timeout=config.grok_timeout
         )
+        logger.info("Grok API call successful")
 
-        if not emails:
-            logger.info("No new emails from Grok. Workflow complete.")
-            email_client.disconnect()
-            return 0
+        # Step 5: Process and validate data
+        logger.info("Processing and validating data...")
+        structured_data = json_processor.process(raw_data)
+        logger.info(f"Data processed: {structured_data.get('date')}")
 
-        logger.info(f"Found {len(emails)} unread email(s) to process")
+        # Step 6: Generate infographic
+        logger.info("Generating infographic...")
+        image_path = infographic_gen.generate(structured_data, timeout=120)
+        logger.info(f"Infographic generated: {image_path}")
 
-        # Step 6: Process each email
-        success_count = 0
-        failure_count = 0
+        # Step 7: Send to Telegram
+        logger.info("Sending to Telegram...")
+        caption = telegram_bot.format_caption(structured_data)
+        message_id = telegram_bot.send_photo(image_path, caption)
+        logger.info(f"Sent to Telegram: message_id={message_id}")
 
-        for email_id, raw_email in emails:
-            success = process_email(
-                email_id=email_id,
-                raw_email=raw_email,
-                email_parser=email_parser,
-                json_processor=json_processor,
-                html_parser=html_parser,
-                infographic_gen=infographic_gen,
-                telegram_bot=telegram_bot,
-                email_client=email_client,
-                config=config
-            )
+        # Step 8: Archive data (optional)
+        if config.archive_reports:
+            archive_data(structured_data, image_path, config)
 
-            if success:
-                success_count += 1
-            else:
-                failure_count += 1
-
-        # Step 7: Cleanup
-        email_client.disconnect()
-
-        # Step 8: Log summary
+        # Step 9: Log success
         duration = time.time() - start_time
         logger.info("=" * 60)
-        logger.info(f"Workflow completed in {duration:.2f}s")
-        logger.info(f"Success: {success_count}, Failures: {failure_count}")
+        logger.info(f"Workflow completed successfully in {duration:.2f}s")
         logger.info("=" * 60)
 
-        # Determine exit code
-        if failure_count == 0:
-            return 0  # All succeeded
-        elif success_count > 0:
-            return 1  # Partial failure
-        else:
-            return 2  # Complete failure
+        return 0
 
-    except EmailFetchError as e:
+    except GrokAPIError as e:
         if logger:
-            logger.critical(f"Email fetch error: {e}", exc_info=True)
+            logger.critical(f"Grok API error: {e}", exc_info=True)
         else:
-            print(f"EMAIL FETCH ERROR: {e}", file=sys.stderr)
+            print(f"GROK API ERROR: {e}", file=sys.stderr)
+        return 2
+
+    except DataProcessingError as e:
+        if logger:
+            logger.critical(f"Data processing error: {e}", exc_info=True)
+        else:
+            print(f"DATA PROCESSING ERROR: {e}", file=sys.stderr)
+        return 2
+
+    except InfographicGenerationError as e:
+        if logger:
+            logger.critical(f"Infographic generation error: {e}", exc_info=True)
+        else:
+            print(f"INFOGRAPHIC ERROR: {e}", file=sys.stderr)
+        return 2
+
+    except TelegramSendError as e:
+        if logger:
+            logger.critical(f"Telegram send error: {e}", exc_info=True)
+        else:
+            print(f"TELEGRAM ERROR: {e}", file=sys.stderr)
         return 2
 
     except Exception as e:
